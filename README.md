@@ -1,6 +1,6 @@
 # Wakeful
 
-Utilities to aid implementing [`Waker`s](Waker) and working with tasks.
+Utilities to aid implementing [`Waker`][Waker]s and working with tasks.
 
 [![Crates.io](https://img.shields.io/crates/v/wakeful.svg)](https://crates.io/crates/wakeful)
 [![Documentation](https://docs.rs/wakeful/badge.svg)][documentation]
