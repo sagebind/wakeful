@@ -1,6 +1,6 @@
 [package]
 name = "wakeful"
-version = "0.1.0"
+version = "0.1.1"
 description = "Utilities to aid implementing wakers and working with tasks."
 authors = ["Stephen M. Coakley <me@stephencoakley.com>"]
 license = "MIT"
