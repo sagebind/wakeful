@@ -6,7 +6,7 @@ Utilities to aid implementing [`Waker`][Waker]s and working with tasks.
 [![Documentation](https://docs.rs/wakeful/badge.svg)][documentation]
 ![License](https://img.shields.io/github/license/sagebind/wakeful)
 ![Maintenance](https://img.shields.io/badge/maintenance-actively--developed-brightgreen.svg)
-![Build](https://github.com/sagebind/wakeful/workflows/ci/badge.svg)
+![Build](https://github.com/sagebind/wakeful/workflows/build/badge.svg)
 
 ## [Documentation]
 
