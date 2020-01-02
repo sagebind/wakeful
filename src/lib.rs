@@ -151,15 +151,6 @@ pub trait Wake: Send + Sync + Clone {
         // essentially being passed around directly with no indirection without
         // any extra effort from the implementer.
 
-        /// Convert a wake into a [`RawWaker`] handle.
-        fn create_raw_waker<W: Wake>(wake: W) -> RawWaker {
-            if mem::size_of::<W>() <= mem::size_of::<*const ()>() {
-                create_thin(wake)
-            } else {
-                create_boxed(wake)
-            }
-        }
-
         /// Convert a wake into a [`RawWaker`] handle by allocating a box.
         ///
         /// This is the easier implementation to understand. We create a data
@@ -189,7 +180,10 @@ pub trait Wake: Send + Sync + Clone {
         ///
         /// This is the trickier implementation, where we treat the data pointer
         /// as a plain `usize` and store the bits of self in it.
-        fn create_thin<W: Wake>(wake: W) -> RawWaker {
+        ///
+        /// Unsafe because we cannot statically guarantee that the size of `W`
+        /// does not exceed pointer size.
+        unsafe fn create_thin<W: Wake>(wake: W) -> RawWaker {
             let mut data = ptr::null();
 
             // The following code will unleash the kraken if this invariant
@@ -200,13 +194,11 @@ pub trait Wake: Send + Sync + Clone {
             // simply transmute here as that would potentially read off the end
             // of `wake`. Instead, we copy from `wake` to `data` (not the
             // _target_ of `data`, which has no meaning to us).
-            unsafe {
-                ptr::copy_nonoverlapping(
-                    &wake as *const W,
-                    &mut data as *mut *const () as *mut W,
-                    1,
-                );
-            }
+            ptr::copy_nonoverlapping(
+                &wake as *const W,
+                &mut data as *mut *const () as *mut W,
+                1,
+            );
 
             // We moved `wake` into `data`, so make sure we don't keep the old
             // copy around (there can be only one!).
@@ -215,23 +207,29 @@ pub trait Wake: Send + Sync + Clone {
             RawWaker::new(
                 data,
                 &RawWakerVTable::new(
-                    |data| unsafe {
+                    |data| {
                         create_thin((&*(&data as *const *const () as *const W)).clone())
                     },
-                    |data| unsafe {
+                    |data| {
                         mem::transmute_copy::<_, W>(&data).wake();
                     },
-                    |data| unsafe {
+                    |data| {
                         (&*(&data as *const *const () as *const W)).wake_by_ref();
                     },
-                    |data| unsafe {
+                    |data| {
                         mem::transmute_copy::<_, W>(&data);
                     },
                 ),
             )
         }
 
-        unsafe { Waker::from_raw(create_raw_waker(self)) }
+        unsafe {
+            if mem::size_of::<Self>() <= mem::size_of::<*const ()>() {
+                Waker::from_raw(create_thin(self))
+            } else {
+                Waker::from_raw(create_boxed(self))
+            }
+        }
     }
 }
 
