@@ -1,8 +1,35 @@
 //! Utilities to aid implementing [`Waker`s](std::task::Waker) and working with
 //! tasks.
 //!
-//! The primary feature of this crate is [`Wake`], which allows you to construct
+//! The highlight of this crate is [`Wake`], which allows you to construct
 //! wakers from your own types by implementing this trait.
+//!
+//! # Examples
+//!
+//! Implementing your own `block_on` function using this crate:
+//!
+//! ```
+//! use std::{
+//!     future::Future,
+//!     pin::Pin,
+//!     task::{Context, Poll},
+//!     thread,
+//! };
+//! use wakeful::Wake;
+//!
+//! fn block_on<F: Future>(mut future: F) -> F::Output {
+//!     let waker = thread::current().into_waker();
+//!     let mut context = Context::from_waker(&waker);
+//!     let mut future = unsafe { Pin::new_unchecked(&mut future) };
+//!
+//!     loop {
+//!         match future.as_mut().poll(&mut context) {
+//!             Poll::Ready(output) => return output,
+//!             Poll::Pending => thread::park(),
+//!         }
+//!     }
+//! }
+//! ```
 
 #![warn(
     future_incompatible,
@@ -45,8 +72,52 @@ use std::{
 /// optimization the underlying implementation will pass `self` in directly to
 /// [`RawWakerVTable`] functions. For types larger than a pointer, an allocation
 /// will be made on creation and when cloning.
+///
+/// # Examples
+///
+/// ```
+/// use wakeful::Wake;
+///
+/// /// Doesn't actually do anything except print a message when wake is called.
+/// #[derive(Clone)]
+/// struct PrintWaker;
+///
+/// impl Wake for PrintWaker {
+///     fn wake_by_ref(&self) {
+///         println!("wake called!");
+///     }
+/// }
+///
+/// let waker = PrintWaker.into_waker();
+/// waker.wake(); // prints "wake called!"
+/// ```
+///
+/// ```
+/// use std::task::Waker;
+/// use wakeful::Wake;
+///
+/// /// Delegates wake calls to multiple wakers.
+/// #[derive(Clone)]
+/// struct MultiWaker(Vec<Waker>);
+///
+/// impl Wake for MultiWaker {
+///     fn wake(self) {
+///         for waker in self.0 {
+///             waker.wake();
+///         }
+///     }
+///
+///     fn wake_by_ref(&self) {
+///         for waker in &self.0 {
+///             waker.wake_by_ref();
+///         }
+///     }
+/// }
+/// ```
 pub trait Wake: Send + Sync + Clone {
-    /// Wake up the task associated with this waker, consuming the waker.
+    /// Wake up the task associated with this waker, consuming the waker. When
+    /// converted into a waker handle, this method is invoked whenever
+    /// [`Waker::wake`] is called.
     ///
     /// By default, this delegates to [`Wake::wake_by_ref`], but can be
     /// overridden if a more efficient owned implementation is possible.
@@ -54,7 +125,9 @@ pub trait Wake: Send + Sync + Clone {
         self.wake_by_ref();
     }
 
-    /// Wake up the task associated with this waker, consuming the waker.
+    /// Wake up the task associated with this waker, consuming the waker. When
+    /// converted into a waker handle, this method is invoked whenever
+    /// [`Waker::wake_by_ref`] is called.
     fn wake_by_ref(&self);
 
     /// Convert this into a [`Waker`] handle.
