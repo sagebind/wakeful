@@ -169,7 +169,7 @@ pub trait Wake: Send + Sync + Clone {
                 Box::into_raw(Box::new(wake)) as *const (),
                 &RawWakerVTable::new(
                     |data| unsafe {
-                        create_raw_waker((&*(data as *const W)).clone())
+                        create_boxed((&*(data as *const W)).clone())
                     },
                     |data| unsafe {
                         Box::from_raw(data as *mut W).wake();
@@ -216,7 +216,7 @@ pub trait Wake: Send + Sync + Clone {
                 data,
                 &RawWakerVTable::new(
                     |data| unsafe {
-                        create_raw_waker((&*(&data as *const *const () as *const W)).clone())
+                        create_thin((&*(&data as *const *const () as *const W)).clone())
                     },
                     |data| unsafe {
                         mem::transmute_copy::<_, W>(&data).wake();
