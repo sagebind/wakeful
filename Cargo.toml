@@ -1,5 +1,15 @@
 [package]
-name = "futures-misc"
+name = "wakeful"
 version = "0.1.0"
+description = "Utilities to aid implementing wakers and working with tasks."
 authors = ["Stephen M. Coakley <me@stephencoakley.com>"]
+license = "MIT"
+keywords = ["async", "waker"]
+categories = ["asynchronous"]
+repository = "https://github.com/sagebind/wakeful"
+documentation = "https://docs.rs/wakeful/"
+readme = "README.md"
 edition = "2018"
+
+[badges.maintenance]
+status = "actively-developed"

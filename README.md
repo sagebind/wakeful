@@ -1,7 +1,21 @@
-# futures-misc
+# Wakeful
 
-A collection of useful low-level utilities for working with futures.
+Utilities to aid implementing [`Waker`s](Waker) and working with tasks.
+
+[![Crates.io](https://img.shields.io/crates/v/wakeful.svg)](https://crates.io/crates/wakeful)
+[![Documentation](https://docs.rs/wakeful/badge.svg)][documentation]
+![License](https://img.shields.io/github/license/sagebind/wakeful)
+![Maintenance](https://img.shields.io/badge/maintenance-actively--developed-brightgreen.svg)
+![Build](https://github.com/sagebind/wakeful/workflows/ci/badge.svg)
+
+## [Documentation]
+
+Please check out the [documentation] for details on what Wakeful can do and how to use it.
 
 ## License
 
 This library is licensed under the MIT license. See the [LICENSE](LICENSE) file for details.
+
+
+[documentation]: https://docs.rs/wakeful
+[Waker]: https://doc.rust-lang.org/stable/std/task/struct.Waker.html
