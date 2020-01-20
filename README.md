@@ -2,10 +2,11 @@
 
 Utilities to aid implementing [`Waker`][Waker]s and working with tasks.
 
+**Currently unsound. I might come back to this later and fix it if I can come up with a solution.**
+
 [![Crates.io](https://img.shields.io/crates/v/wakeful.svg)](https://crates.io/crates/wakeful)
 [![Documentation](https://docs.rs/wakeful/badge.svg)][documentation]
 ![License](https://img.shields.io/github/license/sagebind/wakeful)
-![Maintenance](https://img.shields.io/badge/maintenance-actively--developed-brightgreen.svg)
 ![Build](https://github.com/sagebind/wakeful/workflows/build/badge.svg)
 
 ## [Documentation]
